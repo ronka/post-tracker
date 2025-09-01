@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
 
 type ParcelStatus =
   | 'Unknown'
@@ -66,26 +68,23 @@ export default function App() {
 
   const refreshItem = useCallback(async (item: ParcelItem) => {
     const status = await fetchParcelStatus(item.code)
-    const updated: ParcelItem = {
-      ...item,
-      status,
-      lastUpdated: Date.now(),
-    }
-    const next = items.map((it) => (it.id === item.id ? updated : it))
-    setItems(next)
-    await writeItems(next)
-  }, [items])
+    setItems((prev) => {
+      const next = prev.map((it) => (it.id === item.id ? { ...it, status, lastUpdated: Date.now() } : it))
+      void writeItems(next)
+      return next
+    })
+  }, [])
 
   const refreshAll = useCallback(async () => {
     setLoading(true)
     try {
-      const next: ParcelItem[] = []
-      for (const item of items) {
-        const status = await fetchParcelStatus(item.code)
-        next.push({ ...item, status, lastUpdated: Date.now() })
-      }
-      setItems(next)
-      await writeItems(next)
+      const updated = await Promise.all(items.map(async (item) => ({
+        ...item,
+        status: await fetchParcelStatus(item.code),
+        lastUpdated: Date.now(),
+      })))
+      setItems(updated)
+      await writeItems(updated)
     } finally {
       setLoading(false)
     }
@@ -126,12 +125,15 @@ export default function App() {
       status: 'Unknown',
       lastUpdated: Date.now(),
     }
-    const next = [newItem, ...items]
-    setItems(next)
-    await writeItems(next)
+    setItems((prev) => {
+      const next = [newItem, ...prev]
+      void writeItems(next)
+      return next
+    })
     setCodeInput('')
     setLabelInput('')
-    refreshItem(newItem)
+    // Kick off background status fetch; do not block form UX
+    void refreshItem(newItem)
   }
 
   const startEdit = (it: ParcelItem) => {
@@ -161,32 +163,32 @@ export default function App() {
 
   return (
     <div className="container">
-      <div className="header">
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <div style={{ fontWeight: 700 }}>Parcel Tracker</div>
-          <div className="muted" style={{ fontSize: 12 }}>{subtitle}</div>
+          <div className="font-bold">Parcel Tracker</div>
+          <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
         <div>
-          <button onClick={refreshAll} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh All'}</button>
+          <Button onClick={refreshAll} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh All'}</Button>
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="row" style={{ marginBottom: 12 }}>
-        <input
+      <form onSubmit={onSubmit} className="flex gap-2 mb-3">
+        <Input
           className="grow"
           placeholder="Parcel code"
           value={codeInput}
           onChange={(e) => setCodeInput(e.target.value)}
         />
-        <input
+        <Input
           className="grow"
           placeholder="Label (optional)"
           value={labelInput}
           onChange={(e) => setLabelInput(e.target.value)}
         />
-        <button type="submit">{editingId ? 'Save' : 'Add'}</button>
+        <Button type="submit">{editingId ? 'Save' : 'Add'}</Button>
         {editingId && (
-          <button type="button" onClick={cancelEdit}>Cancel</button>
+          <Button type="button" onClick={cancelEdit}>Cancel</Button>
         )}
       </form>
 
@@ -199,13 +201,13 @@ export default function App() {
                 {it.label && <div className="muted" style={{ fontSize: 12 }}>{it.label}</div>}
               </div>
               <div className="actions">
-                <button onClick={() => refreshItem(it)}>Refresh</button>
-                <button onClick={() => startEdit(it)}>Edit</button>
-                <button onClick={() => removeItem(it.id)}>Delete</button>
+                <Button onClick={() => refreshItem(it)}>Refresh</Button>
+                <Button onClick={() => startEdit(it)}>Edit</Button>
+                <Button variant="destructive" onClick={() => removeItem(it.id)}>Delete</Button>
               </div>
             </div>
             <div className="row">
-              <div className="status grow">{it.status}</div>
+              <div className="status grow"><span className="badge">{it.status}</span></div>
               <div className="muted" style={{ fontSize: 12 }}>Updated {timeAgo(it.lastUpdated)}</div>
             </div>
           </div>
