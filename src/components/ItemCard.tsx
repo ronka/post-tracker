@@ -26,7 +26,7 @@ export function ItemCard({ item, onRefresh, onEdit, onDelete }: ItemCardProps) {
                 <div className="flex items-center gap-2 mb-1.5">
                     <div className="grow text-right">
                         {item.label && (
-                            <div className="text-slate-500">{item.label}</div>
+                            <div className="text-slate-700 font-bold">{item.label}</div>
                         )}
                         <div className="font-medium text-slate-900 text-xs">{item.code}</div>
                     </div>

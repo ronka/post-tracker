@@ -3,7 +3,8 @@ import './App.css'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { ItemCard } from './components/ItemCard'
-import type { ParcelItem, ParcelStatus } from './types'
+import type { ParcelItem } from './types'
+import { useBulkStatuses, useRefreshSingle } from '@/lib/useTracking'
 
 const STORAGE_KEY = 'parcel-tracker:items'
 
@@ -28,19 +29,6 @@ function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
-async function fetchParcelStatus(_code: string): Promise<ParcelStatus> {
-  // Placeholder provider. Replace with a real API integration.
-  // Produces a deterministic pseudo-status for now.
-  const statuses: ParcelStatus[] = [
-    'Info Received',
-    'In Transit',
-    'Out for Delivery',
-    'Delivered',
-  ]
-  const idx = Math.abs([..._code].reduce((a, c) => a + c.charCodeAt(0), 0)) % statuses.length
-  return statuses[idx]
-}
-
 export default function App() {
   const [items, setItems] = useState<ParcelItem[]>([])
   const [codeInput, setCodeInput] = useState('')
@@ -48,33 +36,40 @@ export default function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Fetch all statuses (bulk) when items are available
+  const bulk = useBulkStatuses(items)
+  const { refresh: refreshSingle } = useRefreshSingle()
+
   useEffect(() => {
     readItems().then(setItems)
   }, [])
 
   const refreshItem = useCallback(async (item: ParcelItem) => {
-    const status = await fetchParcelStatus(item.code)
+    const { status } = await refreshSingle(item.code)
     setItems((prev) => {
       const next = prev.map((it) => (it.id === item.id ? { ...it, status, lastUpdated: Date.now() } : it))
       void writeItems(next)
       return next
     })
-  }, [])
+  }, [refreshSingle])
 
   const refreshAll = useCallback(async () => {
     setLoading(true)
     try {
-      const updated = await Promise.all(items.map(async (item) => ({
-        ...item,
-        status: await fetchParcelStatus(item.code),
-        lastUpdated: Date.now(),
-      })))
-      setItems(updated)
-      await writeItems(updated)
+      const res = await bulk.refetch()
+      if (res.data && items.length) {
+        const updated = items.map((it) => ({
+          ...it,
+          status: (bulk.mapped?.find((m) => m.id === it.id) ?? it).status,
+          lastUpdated: Date.now(),
+        }))
+        setItems(updated)
+        await writeItems(updated)
+      }
     } finally {
       setLoading(false)
     }
-  }, [items])
+  }, [bulk, items])
 
   useEffect(() => {
     function onMessage(msg: unknown) {
@@ -88,6 +83,17 @@ export default function App() {
       return () => chrome.runtime.onMessage.removeListener(listener)
     }
   }, [refreshAll])
+
+  // When bulk data arrives, merge into items and persist
+  useEffect(() => {
+    if (!bulk.data || !bulk.mapped || items.length === 0) return
+    const updated = items.map((it) => {
+      const mapped = bulk.mapped!.find((m) => m.id === it.id)
+      return mapped ? { ...it, status: mapped.status, lastUpdated: Date.now() } : it
+    })
+    setItems(updated)
+    void writeItems(updated)
+  }, [bulk.data])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -155,7 +161,7 @@ export default function App() {
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
         <div>
-          <Button size="sm" onClick={refreshAll} disabled={loading}>{loading ? 'מרענן…' : 'רענן הכל'}</Button>
+          <Button size="sm" onClick={refreshAll} disabled={loading || bulk.isFetching}>{loading || bulk.isFetching ? 'מרענן…' : 'רענן הכל'}</Button>
         </div>
       </div>
 

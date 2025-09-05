@@ -15,3 +15,10 @@ export type ParcelItem = {
 }
 
 
+// Backend response shapes
+export type BackendSingleResponse = unknown
+export type BackendBulkResponse = Record<string, unknown>
+
+export type TrackedItem = ParcelItem & { raw?: unknown }
+
+
