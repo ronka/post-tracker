@@ -165,11 +165,11 @@ export default function App() {
     <div className="container">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="font-bold">Parcel Tracker</div>
+          <div className="font-semibold text-slate-800">Parcel Tracker</div>
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
         <div>
-          <Button onClick={refreshAll} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh All'}</Button>
+          <Button size="sm" onClick={refreshAll} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh All'}</Button>
         </div>
       </div>
 
@@ -186,9 +186,9 @@ export default function App() {
           value={labelInput}
           onChange={(e) => setLabelInput(e.target.value)}
         />
-        <Button type="submit">{editingId ? 'Save' : 'Add'}</Button>
+        <Button size="sm" type="submit">{editingId ? 'Save' : 'Add'}</Button>
         {editingId && (
-          <Button type="button" onClick={cancelEdit}>Cancel</Button>
+          <Button size="sm" type="button" onClick={cancelEdit}>Cancel</Button>
         )}
       </form>
 
@@ -197,23 +197,23 @@ export default function App() {
           <div key={it.id} className="card">
             <div className="row" style={{ marginBottom: 6 }}>
               <div className="grow">
-                <div style={{ fontWeight: 600 }}>{it.code}</div>
-                {it.label && <div className="muted" style={{ fontSize: 12 }}>{it.label}</div>}
+                <div className="font-medium text-slate-900">{it.code}</div>
+                {it.label && <div className="text-xs text-slate-500">{it.label}</div>}
               </div>
-              <div className="actions">
-                <Button onClick={() => refreshItem(it)}>Refresh</Button>
-                <Button onClick={() => startEdit(it)}>Edit</Button>
-                <Button variant="destructive" onClick={() => removeItem(it.id)}>Delete</Button>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => refreshItem(it)}>Refresh</Button>
+                <Button size="sm" onClick={() => startEdit(it)}>Edit</Button>
+                <Button size="sm" variant="destructive" onClick={() => removeItem(it.id)}>Delete</Button>
               </div>
             </div>
             <div className="row">
-              <div className="status grow"><span className="badge">{it.status}</span></div>
-              <div className="muted" style={{ fontSize: 12 }}>Updated {timeAgo(it.lastUpdated)}</div>
+              <div className="grow"><span className="badge">{it.status}</span></div>
+              <div className="text-xs text-slate-500">Updated {timeAgo(it.lastUpdated)}</div>
             </div>
           </div>
         ))}
         {items.length === 0 && (
-          <div className="muted" style={{ textAlign: 'center' }}>No parcels yet. Add one above.</div>
+          <div className="text-xs text-slate-500" style={{ textAlign: 'center' }}>No parcels yet. Add one above.</div>
         )}
       </div>
     </div>
