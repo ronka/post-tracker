@@ -150,7 +150,7 @@ export default function App() {
     const total = items.length
     const delivered = items.filter((i) => i.status === 'Delivered').length
     const transit = items.filter((i) => i.status !== 'Delivered').length
-    return `סה"כ: ${total}    בדרך: ${transit}    נמסרו: ${delivered}`
+    return `סה"כ: ${total} | בדרך: ${transit} | נמסרו: ${delivered}`
   }, [items])
 
   return (
