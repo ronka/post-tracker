@@ -2,22 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
-
-type ParcelStatus =
-  | 'Unknown'
-  | 'Info Received'
-  | 'In Transit'
-  | 'Out for Delivery'
-  | 'Delivered'
-  | 'Exception'
-
-type ParcelItem = {
-  id: string
-  code: string
-  label?: string
-  status: ParcelStatus
-  lastUpdated: number
-}
+import { ItemCard } from './components/ItemCard'
+import type { ParcelItem, ParcelStatus } from './types'
 
 const STORAGE_KEY = 'parcel-tracker:items'
 
@@ -194,23 +180,13 @@ export default function App() {
 
       <div className="list">
         {items.map((it) => (
-          <div key={it.id} className="card">
-            <div className="row" style={{ marginBottom: 6 }}>
-              <div className="grow">
-                <div className="font-medium text-slate-900">{it.code}</div>
-                {it.label && <div className="text-xs text-slate-500">{it.label}</div>}
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => refreshItem(it)}>Refresh</Button>
-                <Button size="sm" onClick={() => startEdit(it)}>Edit</Button>
-                <Button size="sm" variant="destructive" onClick={() => removeItem(it.id)}>Delete</Button>
-              </div>
-            </div>
-            <div className="row">
-              <div className="grow"><span className="badge">{it.status}</span></div>
-              <div className="text-xs text-slate-500">Updated {timeAgo(it.lastUpdated)}</div>
-            </div>
-          </div>
+          <ItemCard
+            key={it.id}
+            item={it}
+            onRefresh={refreshItem}
+            onEdit={startEdit}
+            onDelete={removeItem}
+          />
         ))}
         {items.length === 0 && (
           <div className="text-xs text-slate-500" style={{ textAlign: 'center' }}>No parcels yet. Add one above.</div>
@@ -218,15 +194,4 @@ export default function App() {
       </div>
     </div>
   )
-}
-
-function timeAgo(ts: number): string {
-  const delta = Date.now() - ts
-  const minutes = Math.floor(delta / 60000)
-  if (minutes < 1) return 'just now'
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
 }
