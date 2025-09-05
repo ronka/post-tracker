@@ -157,7 +157,7 @@ export default function App() {
     <div className="container">
       <div className="flex items-center justify-between mb-3">
         <div className="text-right">
-          <div className="font-semibold text-slate-800">מעקב משלוחים</div>
+          <div className="font-semibold text-slate-800">📦 מעקב משלוחים</div>
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
         <div>
