@@ -9,6 +9,7 @@ body {
   margin: 0;
   background: #f1f5f9;
   color: #0f172a;
+  font-family: 'Open Sans', Open Sans, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 /* Popup specific styles (minimal; most via Tailwind) */

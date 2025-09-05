@@ -150,7 +150,7 @@ export default function App() {
   return (
     <div className="container">
       <div className="flex items-center justify-between mb-3">
-        <div>
+        <div className="text-right">
           <div className="font-semibold text-slate-800">מעקב משלוחים</div>
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
@@ -161,13 +161,11 @@ export default function App() {
 
       <form onSubmit={onSubmit} className="flex gap-2 mb-3">
         <Input
-          className="grow"
           placeholder="קוד משלוח"
           value={codeInput}
           onChange={(e) => setCodeInput(e.target.value)}
         />
         <Input
-          className="grow"
           placeholder="תוית (לא חובה)"
           value={labelInput}
           onChange={(e) => setLabelInput(e.target.value)}
