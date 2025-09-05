@@ -144,37 +144,37 @@ export default function App() {
     const total = items.length
     const delivered = items.filter((i) => i.status === 'Delivered').length
     const transit = items.filter((i) => i.status !== 'Delivered').length
-    return `Total: ${total}    Transit: ${transit}    Delivered: ${delivered}`
+    return `סה"כ: ${total}    בדרך: ${transit}    נמסרו: ${delivered}`
   }, [items])
 
   return (
     <div className="container">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="font-semibold text-slate-800">Parcel Tracker</div>
+          <div className="font-semibold text-slate-800">מעקב משלוחים</div>
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
         <div>
-          <Button size="sm" onClick={refreshAll} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh All'}</Button>
+          <Button size="sm" onClick={refreshAll} disabled={loading}>{loading ? 'מרענן…' : 'רענן הכל'}</Button>
         </div>
       </div>
 
       <form onSubmit={onSubmit} className="flex gap-2 mb-3">
         <Input
           className="grow"
-          placeholder="Parcel code"
+          placeholder="קוד משלוח"
           value={codeInput}
           onChange={(e) => setCodeInput(e.target.value)}
         />
         <Input
           className="grow"
-          placeholder="Label (optional)"
+          placeholder="תוית (לא חובה)"
           value={labelInput}
           onChange={(e) => setLabelInput(e.target.value)}
         />
-        <Button size="sm" type="submit">{editingId ? 'Save' : 'Add'}</Button>
+        <Button size="sm" type="submit">{editingId ? 'שמור' : 'הוסף'}</Button>
         {editingId && (
-          <Button size="sm" type="button" onClick={cancelEdit}>Cancel</Button>
+          <Button size="sm" type="button" onClick={cancelEdit}>בטל</Button>
         )}
       </form>
 
@@ -189,7 +189,7 @@ export default function App() {
           />
         ))}
         {items.length === 0 && (
-          <div className="text-xs text-slate-500" style={{ textAlign: 'center' }}>No parcels yet. Add one above.</div>
+          <div className="text-xs text-slate-500" style={{ textAlign: 'center' }}>אין עדיין משלוחים. הוסף אחד למעלה.</div>
         )}
       </div>
     </div>

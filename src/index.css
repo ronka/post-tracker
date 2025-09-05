@@ -54,6 +54,17 @@ body {
   margin-left: 6px;
 }
 
+/* RTL adjustments */
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .actions button {
+  margin-left: 0;
+  margin-right: 6px;
+}
+
 .badge {
   display: inline-block;
   border-radius: 9999px;
