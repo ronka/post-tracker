@@ -8,9 +8,15 @@ export function cn(...inputs: ClassValue[]) {
 // Heuristic mapping from backend raw item to ParcelStatus
 import type { IsraelPostTrackResponse, ParcelStatus } from '@/types'
 
+export function isIsraelPostTrackResponse(value: unknown): value is IsraelPostTrackResponse {
+  if (!value || typeof value !== 'object') return false
+  const obj = value as Record<string, unknown>
+  return Array.isArray(obj.Maslul) && typeof obj.ItemCode === 'string'
+}
+
 export function mapBackendToParcelStatus(raw: IsraelPostTrackResponse | { error?: string } | undefined): ParcelStatus {
   try {
-    if (!raw || (typeof raw === 'object' && 'error' in raw)) return 'Unknown'
+    if (!isIsraelPostTrackResponse(raw)) return 'Unknown'
     const latest = raw.Maslul?.[0]
     const text: string = String(
       latest?.CategoryName || latest?.Status || raw.StatusForDisplay || raw.CategoryName || ''
@@ -28,7 +34,7 @@ export function mapBackendToParcelStatus(raw: IsraelPostTrackResponse | { error?
 }
 
 export function extractStatusText(raw: IsraelPostTrackResponse | { error?: string } | undefined): string | undefined {
-  if (!raw || (typeof raw === 'object' && 'error' in raw)) return undefined
+  if (!isIsraelPostTrackResponse(raw)) return undefined
   const latest = raw.Maslul?.[0]
   return latest?.Status || latest?.CategoryName || raw.StatusForDisplay || undefined
 }
