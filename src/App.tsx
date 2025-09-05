@@ -45,9 +45,9 @@ export default function App() {
   }, [])
 
   const refreshItem = useCallback(async (item: ParcelItem) => {
-    const { status } = await refreshSingle(item.code)
+    const { status, statusText } = await refreshSingle(item.code)
     setItems((prev) => {
-      const next = prev.map((it) => (it.id === item.id ? { ...it, status, lastUpdated: Date.now() } : it))
+      const next = prev.map((it) => (it.id === item.id ? { ...it, status, statusText, lastUpdated: Date.now() } : it))
       void writeItems(next)
       return next
     })
@@ -89,7 +89,7 @@ export default function App() {
     if (!bulk.data || !bulk.mapped || items.length === 0) return
     const updated = items.map((it) => {
       const mapped = bulk.mapped!.find((m) => m.id === it.id)
-      return mapped ? { ...it, status: mapped.status, lastUpdated: Date.now() } : it
+      return mapped ? { ...it, status: mapped.status, statusText: mapped.statusText, lastUpdated: Date.now() } : it
     })
     setItems(updated)
     void writeItems(updated)

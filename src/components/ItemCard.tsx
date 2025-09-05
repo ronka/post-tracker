@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { timeAgo } from "@/lib/utils"
 import type { ParcelItem, ParcelStatus } from "@/types"
-import { RefreshCw, Pencil, Trash2 } from "lucide-react"
+import { RefreshCw, Pencil, Trash2, ExternalLink } from "lucide-react"
 
 type ItemCardProps = {
     item: ParcelItem
@@ -28,7 +28,20 @@ export function ItemCard({ item, onRefresh, onEdit, onDelete }: ItemCardProps) {
                         {item.label && (
                             <div className="text-slate-700 font-bold">{item.label}</div>
                         )}
-                        <div className="font-medium text-slate-900 text-xs">{item.code}</div>
+                        <div className="flex items-center gap-1 font-medium text-slate-900 text-xs">
+                            {item.code}
+                            <a
+                                href={`https://doar.israelpost.co.il/deliverytracking?itemcode=${encodeURIComponent(item.code)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="מעקב באתר דואר ישראל"
+                                title="מעקב באתר דואר ישראל"
+                                className="ml-1 text-slate-500 hover:text-primary transition-colors"
+                                dir="ltr"
+                            >
+                                <ExternalLink className="size-4" />
+                            </a>
+                        </div>
                     </div>
                     <div className="flex gap-2">
                         <Button
@@ -63,9 +76,14 @@ export function ItemCard({ item, onRefresh, onEdit, onDelete }: ItemCardProps) {
                 <div className="flex items-center gap-2">
                     <div className="grow">
                         <span className="inline-block rounded-full px-2 py-0.5 text-xs bg-muted">{statusHe[item.status]}</span>
+                        {item.statusText && (
+                            <div className="text-[11px] text-slate-600 mt-1" dir="rtl">{item.statusText}</div>
+                        )}
                     </div>
-                    <div className="text-xs text-slate-500">עודכן {timeAgo(item.lastUpdated)}</div>
                 </div>
+
+                <div className="mt-2 text-left text-xs text-slate-500">עודכן {timeAgo(item.lastUpdated)}</div>
+
             </CardContent>
         </Card>
     )

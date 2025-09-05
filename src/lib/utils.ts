@@ -6,13 +6,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Heuristic mapping from backend raw item to ParcelStatus
-export function mapBackendToParcelStatus(raw: any): import('../types').ParcelStatus {
+import type { IsraelPostTrackResponse, ParcelStatus } from '@/types'
+
+export function mapBackendToParcelStatus(raw: IsraelPostTrackResponse | { error?: string } | undefined): ParcelStatus {
   try {
+    if (!raw || (typeof raw === 'object' && 'error' in raw)) return 'Unknown'
+    const latest = raw.Maslul?.[0]
     const text: string = String(
-      raw?.itemcodehistory?.[0]?.stateDescription ??
-      raw?.itemcodehistory?.[0]?.desc ??
-      raw?.status ??
-      ''
+      latest?.CategoryName || latest?.Status || raw.StatusForDisplay || raw.CategoryName || ''
     ).toLowerCase()
     if (!text) return 'Unknown'
     if (text.includes('delivered') || text.includes('נמסר')) return 'Delivered'
@@ -24,6 +25,12 @@ export function mapBackendToParcelStatus(raw: any): import('../types').ParcelSta
   } catch {
     return 'Unknown'
   }
+}
+
+export function extractStatusText(raw: IsraelPostTrackResponse | { error?: string } | undefined): string | undefined {
+  if (!raw || (typeof raw === 'object' && 'error' in raw)) return undefined
+  const latest = raw.Maslul?.[0]
+  return latest?.Status || latest?.CategoryName || raw.StatusForDisplay || undefined
 }
 
 export function timeAgo(timestampMs: number): string {

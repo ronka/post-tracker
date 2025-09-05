@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchBulk, fetchSingle } from '@/lib/api'
-import { mapBackendToParcelStatus } from '@/lib/utils'
+import { extractStatusText, mapBackendToParcelStatus } from '@/lib/utils'
 import type { ParcelItem, TrackedItem } from '@/types'
 
 const QUERY_KEYS = {
@@ -20,12 +20,16 @@ export function useBulkStatuses(items: ParcelItem[]) {
     })
 
     const mapped: TrackedItem[] | undefined = query.data
-        ? items.map((it) => ({
-            ...it,
-            status: mapBackendToParcelStatus((query.data as any)[it.code]),
-            lastUpdated: Date.now(),
-            raw: (query.data as any)[it.code],
-        }))
+        ? items.map((it) => {
+            const raw = (query.data as any)[it.code]
+            return {
+                ...it,
+                status: mapBackendToParcelStatus(raw),
+                statusText: extractStatusText(raw),
+                lastUpdated: Date.now(),
+                raw,
+            }
+        })
         : undefined
 
     return { ...query, mapped }
@@ -45,7 +49,7 @@ export function useRefreshSingle() {
     const refresh = useCallback(
         async (code: string) => {
             const data = await mutation.mutateAsync({ code })
-            return { status: mapBackendToParcelStatus(data), raw: data }
+            return { status: mapBackendToParcelStatus(data as any), statusText: extractStatusText(data as any), raw: data as any }
         },
         [mutation],
     )
