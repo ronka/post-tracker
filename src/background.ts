@@ -26,7 +26,7 @@ async function updateBadgeFromStorage() {
     }
 
     // Show both counts as "inTransit/delivered"
-    const text = `${delivered} ֿ/ ${inTransit}`
+    const text = `${delivered}ֿ/${inTransit}`
     await chrome.action.setBadgeText({ text })
     // Prefer blue when there are items in transit; otherwise green when all delivered
     await chrome.action.setBadgeBackgroundColor({ color: inTransit > 0 ? '#3B82F6' : '#10B981' })
